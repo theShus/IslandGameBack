@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>nordeus</groupId>
-	<artifactId>cnallange</artifactId>
+	<artifactId>NordeusChallangeBack</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>nodreus-challange</name>
 	<description>Nordeus job fair 2024 challange</description>

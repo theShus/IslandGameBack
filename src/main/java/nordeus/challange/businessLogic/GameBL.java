@@ -1,9 +1,9 @@
-package nordeus.cnallange.businessLogic;
+package nordeus.challange.businessLogic;
 
-import nordeus.cnallange.models.CommandResponse;
-import nordeus.cnallange.models.IslandData;
-import nordeus.cnallange.models.IslandInfo;
-import nordeus.cnallange.service.GameServiceI;
+import nordeus.challange.models.CommandResponse;
+import nordeus.challange.models.IslandData;
+import nordeus.challange.models.IslandInfo;
+import nordeus.challange.service.GameServiceI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

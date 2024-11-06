@@ -1,7 +1,7 @@
-package nordeus.cnallange.service;
+package nordeus.challange.service;
 
 
-import nordeus.cnallange.models.CommandResponse;
+import nordeus.challange.models.CommandResponse;
 
 public interface GameServiceI {
 

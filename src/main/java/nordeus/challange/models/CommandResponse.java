@@ -1,4 +1,4 @@
-package nordeus.cnallange.models;
+package nordeus.challange.models;
 
 public class CommandResponse<T> {
     private boolean success = true;

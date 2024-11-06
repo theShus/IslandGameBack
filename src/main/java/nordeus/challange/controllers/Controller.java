@@ -1,9 +1,9 @@
-package nordeus.cnallange.controllers;
+package nordeus.challange.controllers;
 
-import nordeus.cnallange.businessLogic.GameBL;
-import nordeus.cnallange.businessLogic.GameBLI;
-import nordeus.cnallange.models.CommandResponse;
-import nordeus.cnallange.models.IslandData;
+import nordeus.challange.businessLogic.GameBL;
+import nordeus.challange.businessLogic.GameBLI;
+import nordeus.challange.models.CommandResponse;
+import nordeus.challange.models.IslandData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;

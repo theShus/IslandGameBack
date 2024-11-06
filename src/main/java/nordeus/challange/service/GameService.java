@@ -1,7 +1,6 @@
-package nordeus.cnallange.service;
+package nordeus.challange.service;
 
-import nordeus.cnallange.models.CommandResponse;
-import nordeus.cnallange.models.IslandInfo;
+import nordeus.challange.models.CommandResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -9,8 +8,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class GameService implements GameServiceI {

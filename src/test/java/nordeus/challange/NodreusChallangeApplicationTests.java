@@ -1,4 +1,4 @@
-package nordeus.cnallange;
+package nordeus.challange;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

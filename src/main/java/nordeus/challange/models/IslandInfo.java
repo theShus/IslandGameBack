@@ -1,4 +1,4 @@
-package nordeus.cnallange.models;
+package nordeus.challange.models;
 
 public class IslandInfo {
     int sumHeights = 0;
