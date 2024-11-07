@@ -6,12 +6,14 @@ import nordeus.challange.models.CommandResponse;
 import nordeus.challange.models.IslandData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/islandGame")
+@CrossOrigin() // Apply CORS to this controller only
 public class Controller {
 
     private final GameBLI _businessLogic;
@@ -21,9 +23,9 @@ public class Controller {
         this._businessLogic = businessLogic;
     }
 
-    @GetMapping("/getGameData")
+    @GetMapping("/getData")
     public CommandResponse<IslandData> helloWorld() {
-        return _businessLogic.getCalculatedGameData();
+        return _businessLogic.test();
     }
 
     @GetMapping("/check")

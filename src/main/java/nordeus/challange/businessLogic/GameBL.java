@@ -1,8 +1,6 @@
 package nordeus.challange.businessLogic;
 
-import nordeus.challange.models.CommandResponse;
-import nordeus.challange.models.IslandData;
-import nordeus.challange.models.IslandInfo;
+import nordeus.challange.models.*;
 import nordeus.challange.service.GameServiceI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,8 +18,70 @@ public class GameBL implements GameBLI {
         this._gameService = gameService;
     }
 
+
     @Override
-    public CommandResponse<IslandData> getCalculatedGameData() {
+    public CommandResponse<IslandData> getCalculatedGameDataSmooth() {
+//        CommandResponse<IslandData> islandDataRough = getCalculatedGameDataRough();
+//        if (!islandDataRough.isSuccess()) {
+//            return new CommandResponse<>(false, islandDataRough.getMessage(), null);
+//        }
+
+
+        return null;
+    }
+
+    public double[][] generateHeightMap(int[][] mapData, int[][] islandIds, long seed) {
+        int width = mapData.length;
+        int height = mapData[0].length;
+        double[][] heightMap = new double[width][height];
+
+        PerlinNoise perlinNoise = new PerlinNoise(seed);
+
+        // Noise parameters
+        double scale = 0.1; // Adjust the scale to change the "zoom" of the noise
+        int octaves = 4;    // Number of layers of noise
+        double persistence = 0.5; // Controls the amplitude of each octave
+        double lacunarity = 2.0;  // Controls the frequency of each octave
+
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                if (islandIds[x][y] != 0) {
+                    // Generate Perlin noise value for this coordinate
+                    double noiseValue = 0;
+                    double frequency = 1;
+                    double amplitude = 1;
+                    double maxAmplitude = 0;
+
+                    for (int i = 0; i < octaves; i++) {
+                        double sampleX = x * scale * frequency;
+                        double sampleY = y * scale * frequency;
+
+                        double perlinValue = perlinNoise.noise(sampleX, sampleY);
+                        noiseValue += perlinValue * amplitude;
+
+                        maxAmplitude += amplitude;
+                        amplitude *= persistence;
+                        frequency *= lacunarity;
+                    }
+
+                    // Normalize the result
+                    noiseValue /= maxAmplitude;
+
+                    // Apply any desired transformation, e.g., scaling heights
+                    heightMap[x][y] = noiseValue;
+                } else {
+                    // Sea level
+                    heightMap[x][y] = 0;
+                }
+            }
+        }
+
+        return heightMap;
+    }
+
+
+    @Override
+    public CommandResponse<IslandData> test() {
         // Step 1: Retrieve the map data from _gameService
         CommandResponse<int[][]> response = _gameService.getIslandData();
         if (!response.isSuccess()) {
@@ -38,27 +98,20 @@ public class GameBL implements GameBLI {
         // Proceed to calculate island data
         IslandData islandData = calculateIslandData(mapData);
 
-        // Optionally, print the average height map and per-island averages
-        printAverageHeightMap(islandData.getAvgHeightMap());
-        printIslandAverageHeights(islandData.getIslandAvgHeights());
-
-        // Step 7: Return the island data in a CommandResponse
         return new CommandResponse<>(true, "", islandData);
     }
 
-    // New method to calculate island data, keeping all variables local
+    // Updated method to calculate island data with integer rounding
     private IslandData calculateIslandData(int[][] mapData) {
         int rows = mapData.length;
         int cols = mapData[0].length;
 
-        // Use islandIdsMatrix array to keep track of island IDs and visited cells
-        int[][] islandIdsMatrix = new int[rows][cols]; // 0 = unvisited or water, >0 = island ID
-        int islandId = 1; // Start island IDs from 1
+        int[][] islandIdsMatrix = new int[rows][cols];
+        int islandId = 1;
 
-        // Map to store islandId -> sum of heights and cell count
         Map<Integer, IslandInfo> islandInfoMap = new HashMap<>();
 
-        // Perform DFS on each unvisited land cell
+        // Perform DFS to find islands and accumulate data
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (mapData[i][j] > 0 && islandIdsMatrix[i][j] == 0) {
@@ -70,39 +123,34 @@ public class GameBL implements GameBLI {
             }
         }
 
-        // Compute average heights for each island
-        Map<Integer, Double> islandAvgHeights = new HashMap<>();
-        double maxAverageHeight = Double.NEGATIVE_INFINITY;
+        // Compute average heights and center points
+        Map<Integer, Integer> islandAvgHeights = new HashMap<>();
+        Map<Integer, Point> islandCenterPoints = new HashMap<>();
+        int maxAverageHeight = Integer.MIN_VALUE;
         int islandWithMaxAvgHeightId = -1;
 
-        for (var entry : islandInfoMap.entrySet()) {
+        for (Map.Entry<Integer, IslandInfo> entry : islandInfoMap.entrySet()) {
             int id = entry.getKey();
             IslandInfo info = entry.getValue();
-            double avgHeight = (double) info.getSumHeights() / info.getCellCount();
+
+            // Calculate average height and round to nearest integer
+            int avgHeight = (int) Math.round((double) info.getSumHeights() / info.getCellCount());
             islandAvgHeights.put(id, avgHeight);
 
-            // Check if this island has the maximum average height
+            // Calculate center point and round to nearest integer
+            int centerX = (int) Math.round((double) info.getSumX() / info.getCellCount());
+            int centerY = (int) Math.round((double) info.getSumY() / info.getCellCount());
+            Point centerPoint = new Point(centerX, centerY);
+            islandCenterPoints.put(id, centerPoint);
+
+            // Find the island with the maximum average height
             if (avgHeight > maxAverageHeight) {
                 maxAverageHeight = avgHeight;
                 islandWithMaxAvgHeightId = id;
             }
         }
 
-        // Create a matrix where each cell of an island is filled with the average height
-        double[][] avgHeightMap = new double[rows][cols];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-                if (mapData[i][j] > 0) {
-                    int id = islandIdsMatrix[i][j];
-                    avgHeightMap[i][j] = islandAvgHeights.get(id);
-                } else {
-                    avgHeightMap[i][j] = 0;
-                }
-            }
-        }
-
-        // Return the processed island data
-        return new IslandData(islandIdsMatrix, islandAvgHeights, islandWithMaxAvgHeightId, maxAverageHeight, avgHeightMap);
+        return new IslandData(islandIdsMatrix, islandAvgHeights, islandWithMaxAvgHeightId, mapData, islandCenterPoints);
     }
 
     // DFS method to traverse the island
@@ -117,6 +165,7 @@ public class GameBL implements GameBLI {
         islandIds[i][j] = islandId;
         info.addSumHeights(mapData[i][j]);
         info.incrementCellCount();
+        info.addCoordinates(i, j); // Accumulate coordinates
 
         // Visit all four adjacent cells
         dfs(i - 1, j, mapData, islandIds, islandId, info); // Up
@@ -125,62 +174,4 @@ public class GameBL implements GameBLI {
         dfs(i, j + 1, mapData, islandIds, islandId, info); // Right
     }
 
-    // Helper method to print the average height map
-    private void printAverageHeightMap(double[][] avgHeightMap) {
-        System.out.println("Average Height Map:");
-        for (double[] row : avgHeightMap) {
-            for (double val : row) {
-                System.out.printf("%.2f ", val);
-            }
-            System.out.println();
-        }
-    }
-
-    // Helper method to print the average heights per island
-    private void printIslandAverageHeights(Map<Integer, Double> islandAvgHeights) {
-        System.out.println("Island Average Heights:");
-        for (Map.Entry<Integer, Double> entry : islandAvgHeights.entrySet()) {
-            System.out.printf("Island %d: Average Height = %.2f\n", entry.getKey(), entry.getValue());
-        }
-    }
-
-    // Method to determine if the island at (x, y) has the highest average height
-    public boolean isIslandWithHighestAverageHeight(int x, int y) {
-        // Since we don't have instance variables anymore, we need to retrieve and process the data again
-        CommandResponse<IslandData> response = getCalculatedGameData();
-        if (!response.isSuccess()) {
-            System.err.println("Error calculating island data: " + response.getMessage());
-            return false;
-        }
-
-        IslandData islandData = response.getData();
-        int[][] islandIds = islandData.getIslandIds();
-        int[][] mapData = islandData.getMapData(); // We need to store mapData in IslandData now
-
-        int rows = mapData.length;
-        int cols = mapData[0].length;
-
-        // Validate coordinates
-        if (x < 0 || x >= rows || y < 0 || y >= cols) {
-            System.err.println("Coordinates out of bounds.");
-            return false;
-        }
-
-        int islandIdAtCoordinates = islandIds[x][y];
-
-        if (islandIdAtCoordinates == 0) {
-            System.out.println("The selected coordinates are water.");
-            return false;
-        }
-
-        int maxAvgHeightIslandId = islandData.getIslandWithMaxAvgHeightId();
-
-        if (islandIdAtCoordinates == maxAvgHeightIslandId) {
-            System.out.println("The selected island has the highest average height.");
-            return true;
-        } else {
-            System.out.println("The selected island does not have the highest average height.");
-            return false;
-        }
-    }
 }

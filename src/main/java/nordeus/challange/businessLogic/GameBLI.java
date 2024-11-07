@@ -5,5 +5,7 @@ import nordeus.challange.models.IslandData;
 
 public interface GameBLI {
 
-    CommandResponse<IslandData> getCalculatedGameData();
+    CommandResponse<IslandData> getCalculatedGameDataSmooth();
+
+    CommandResponse<IslandData> test();
 }

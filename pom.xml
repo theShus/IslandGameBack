@@ -55,6 +55,20 @@
 			<version>2.2.0</version> <!-- Use Springdoc OpenAPI 2.x for Spring Boot 3 compatibility -->
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-math -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math</artifactId>
+			<version>2.2</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.raylabz/opensimplex -->
+		<dependency>
+			<groupId>com.raylabz</groupId>
+			<artifactId>opensimplex</artifactId>
+			<version>1.0.3</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
