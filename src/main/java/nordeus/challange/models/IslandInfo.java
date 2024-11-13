@@ -1,11 +1,10 @@
-// IslandInfo.java
 package nordeus.challange.models;
 
 public class IslandInfo {
     private int sumHeights;
     private int cellCount;
-    private int sumX; // Sum of row indices
-    private int sumY; // Sum of column indices
+    private int sumX;
+    private int sumY;
 
     public IslandInfo() {
         this.sumHeights = 0;

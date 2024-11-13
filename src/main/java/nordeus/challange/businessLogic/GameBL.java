@@ -1,6 +1,9 @@
 package nordeus.challange.businessLogic;
 
-import nordeus.challange.models.*;
+import nordeus.challange.models.CommandResponse;
+import nordeus.challange.models.IslandData;
+import nordeus.challange.models.IslandInfo;
+import nordeus.challange.models.Point;
 import nordeus.challange.service.GameServiceI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,13 +23,11 @@ public class GameBL implements GameBLI {
 
     @Override
     public CommandResponse<IslandData> getCalculatedGameData() {
-        // Step 1: Retrieve the map data from _gameService
         CommandResponse<int[][]> response = _gameService.getIslandData();
         if (!response.isSuccess()) {
             return new CommandResponse<>(false, response.getMessage(), null);
         }
 
-        // Step 2: Store the map data in a local variable
         int[][] mapData = response.getData();
         if (mapData == null) {
             String errorMessage = "Map data is not available.";
@@ -36,7 +37,6 @@ public class GameBL implements GameBLI {
         return new CommandResponse<>(true, "", calculateIslandData(mapData));
     }
 
-    // Updated method to calculate island data with integer rounding
     private IslandData calculateIslandData(int[][] mapData) {
         int rows = mapData.length;
         int cols = mapData[0].length;
@@ -46,11 +46,12 @@ public class GameBL implements GameBLI {
 
         Map<Integer, IslandInfo> islandInfoMap = new HashMap<>();
 
-        // Perform DFS to find islands and accumulate data
+        // DFS to find islands and accumulate data
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 if (mapData[i][j] > 0 && islandIdsMatrix[i][j] == 0) {
                     IslandInfo info = new IslandInfo();
+
                     dfs(i, j, mapData, islandIdsMatrix, islandId, info);
                     islandInfoMap.put(islandId, info);
                     islandId++;
@@ -101,9 +102,9 @@ public class GameBL implements GameBLI {
         islandIds[i][j] = islandId;
         info.addSumHeights(mapData[i][j]);
         info.incrementCellCount();
-        info.addCoordinates(i, j); // Accumulate coordinates
+        info.addCoordinates(i, j); // Get coords
 
-        // Visit all four adjacent cells
+        // Go to all adjacent cells
         dfs(i - 1, j, mapData, islandIds, islandId, info); // Up
         dfs(i + 1, j, mapData, islandIds, islandId, info); // Down
         dfs(i, j - 1, mapData, islandIds, islandId, info); // Left
