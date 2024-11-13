@@ -9,7 +9,8 @@ public class IslandData {
     private final int[][] mapData;
     private final Map<Integer, Point> islandCenterPoints;
 
-    public IslandData(int[][] islandIds, Map<Integer, Integer> islandAvgHeights, int islandWithMaxAvgHeightId, int[][] mapData, Map<Integer, Point> islandCenterPoints) {
+    public IslandData(int[][] islandIds, Map<Integer, Integer> islandAvgHeights, int islandWithMaxAvgHeightId, int[][] mapData, Map<Integer,
+            Point> islandCenterPoints) {
         this.islandIds = islandIds;
         this.islandAvgHeights = islandAvgHeights;
         this.islandWithMaxAvgHeightId = islandWithMaxAvgHeightId;

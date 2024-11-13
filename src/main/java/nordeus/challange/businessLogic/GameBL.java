@@ -4,7 +4,6 @@ import nordeus.challange.models.*;
 import nordeus.challange.service.GameServiceI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,68 +19,7 @@ public class GameBL implements GameBLI {
 
 
     @Override
-    public CommandResponse<IslandData> getCalculatedGameDataSmooth() {
-//        CommandResponse<IslandData> islandDataRough = getCalculatedGameDataRough();
-//        if (!islandDataRough.isSuccess()) {
-//            return new CommandResponse<>(false, islandDataRough.getMessage(), null);
-//        }
-
-
-        return null;
-    }
-
-    public double[][] generateHeightMap(int[][] mapData, int[][] islandIds, long seed) {
-        int width = mapData.length;
-        int height = mapData[0].length;
-        double[][] heightMap = new double[width][height];
-
-        PerlinNoise perlinNoise = new PerlinNoise(seed);
-
-        // Noise parameters
-        double scale = 0.1; // Adjust the scale to change the "zoom" of the noise
-        int octaves = 4;    // Number of layers of noise
-        double persistence = 0.5; // Controls the amplitude of each octave
-        double lacunarity = 2.0;  // Controls the frequency of each octave
-
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                if (islandIds[x][y] != 0) {
-                    // Generate Perlin noise value for this coordinate
-                    double noiseValue = 0;
-                    double frequency = 1;
-                    double amplitude = 1;
-                    double maxAmplitude = 0;
-
-                    for (int i = 0; i < octaves; i++) {
-                        double sampleX = x * scale * frequency;
-                        double sampleY = y * scale * frequency;
-
-                        double perlinValue = perlinNoise.noise(sampleX, sampleY);
-                        noiseValue += perlinValue * amplitude;
-
-                        maxAmplitude += amplitude;
-                        amplitude *= persistence;
-                        frequency *= lacunarity;
-                    }
-
-                    // Normalize the result
-                    noiseValue /= maxAmplitude;
-
-                    // Apply any desired transformation, e.g., scaling heights
-                    heightMap[x][y] = noiseValue;
-                } else {
-                    // Sea level
-                    heightMap[x][y] = 0;
-                }
-            }
-        }
-
-        return heightMap;
-    }
-
-
-    @Override
-    public CommandResponse<IslandData> test() {
+    public CommandResponse<IslandData> getCalculatedGameData() {
         // Step 1: Retrieve the map data from _gameService
         CommandResponse<int[][]> response = _gameService.getIslandData();
         if (!response.isSuccess()) {
@@ -95,10 +33,7 @@ public class GameBL implements GameBLI {
             return new CommandResponse<>(false, errorMessage, null);
         }
 
-        // Proceed to calculate island data
-        IslandData islandData = calculateIslandData(mapData);
-
-        return new CommandResponse<>(true, "", islandData);
+        return new CommandResponse<>(true, "", calculateIslandData(mapData));
     }
 
     // Updated method to calculate island data with integer rounding
@@ -153,6 +88,7 @@ public class GameBL implements GameBLI {
         return new IslandData(islandIdsMatrix, islandAvgHeights, islandWithMaxAvgHeightId, mapData, islandCenterPoints);
     }
 
+
     // DFS method to traverse the island
     private void dfs(int i, int j, int[][] mapData, int[][] islandIds, int islandId, IslandInfo info) {
         int rows = mapData.length;
@@ -173,5 +109,4 @@ public class GameBL implements GameBLI {
         dfs(i, j - 1, mapData, islandIds, islandId, info); // Left
         dfs(i, j + 1, mapData, islandIds, islandId, info); // Right
     }
-
 }
