@@ -1,0 +1,22 @@
+services:
+  backend:
+    image: shus300/island-game-back
+    container_name: island-game-back
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  frontend:
+    image: shus300/island-game-front
+    container_name: island-game-front
+    ports:
+      - "80:80"
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+networks:
+  app-network:
+    driver: bridge
